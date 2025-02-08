@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Text Extractor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>OCR Text Extractor</h1>
+    <form id="ocr-form" enctype="multipart/form-data" method="POST" action="/extract">
+        <label for="image-file">Select an image file:</label>
+        <input type="file" id="image-file" name="image" accept=".png, .jpg, .jpeg" required>
+        <br>
+        <button type="submit">Run OCR and Generate CSV</button>
+    </form>
+
+    <!-- Progress Bar -->
+    <div id="progress-container" style="display:none;">
+        <label>Processing Image...</label>
+        <progress id="progress-bar" value="0" max="100" style="width:100%;"></progress>
+    </div>
+
+    <!-- Result Section -->
+    <div id="result" style="display: none;">
+        <p>Your CSV file is ready! <a id="download-link" href="" download>Download CSV</a></p>
+    </div>
+</div>
+
+<script>
+    // Handling the form submission and progress bar update
+    document.getElementById("ocr-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/extract", true);
+
+        // Show progress bar
+        document.getElementById("progress-container").style.display = "block";
+        var progressBar = document.getElementById("progress-bar");
+        
+        // Simulate progress update (OCR progress simulation)
+        var progress = 0;
+        var interval = setInterval(function() {
+            progress += 10;
+            progressBar.value = progress;
+            if (progress >= 100) {
+                clearInterval(interval);
+            }
+        }, 500);
+
+        // Send the form data
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // If OCR was successful, show the download link
+                var response = JSON.parse(xhr.responseText);
+                document.getElementById("result").style.display = "block";
+                document.getElementById("download-link").href = response.download_url;
+                document.getElementById("progress-container").style.display = "none"; // Hide progress bar
+            } else {
+                alert("Error occurred while processing the image.");
+            }
+        };
+
+        xhr.send(formData);
+    });
+</script>
+
+</body>
+</html>
